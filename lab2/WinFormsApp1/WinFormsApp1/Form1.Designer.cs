@@ -47,6 +47,11 @@
             EncrypttextBox1 = new RichTextBox();
             label1 = new Label();
             richTextBox1 = new RichTextBox();
+            label2 = new Label();
+            shiftTextBox = new TextBox();
+            button1 = new Button();
+            richTextBox2 = new RichTextBox();
+            label3 = new Label();
             SuspendLayout();
             // 
             // TextEncription
@@ -211,7 +216,7 @@
             // 
             label1.AutoSize = true;
             label1.Font = new Font("Times New Roman", 20.25F, FontStyle.Bold, GraphicsUnit.Point, 204);
-            label1.Location = new Point(901, 350);
+            label1.Location = new Point(901, 432);
             label1.Name = "label1";
             label1.Size = new Size(522, 62);
             label1.TabIndex = 30;
@@ -219,17 +224,68 @@
             // 
             // richTextBox1
             // 
-            richTextBox1.Location = new Point(901, 423);
+            richTextBox1.Location = new Point(901, 499);
             richTextBox1.Name = "richTextBox1";
             richTextBox1.Size = new Size(373, 193);
             richTextBox1.TabIndex = 31;
             richTextBox1.Text = "";
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Font = new Font("Segoe UI", 15F);
+            label2.Location = new Point(948, 318);
+            label2.Name = "label2";
+            label2.Size = new Size(166, 28);
+            label2.TabIndex = 32;
+            label2.Text = "Поставить сдвиг:";
+            // 
+            // shiftTextBox
+            // 
+            shiftTextBox.Location = new Point(1120, 325);
+            shiftTextBox.Name = "shiftTextBox";
+            shiftTextBox.Size = new Size(124, 23);
+            shiftTextBox.TabIndex = 33;
+            // 
+            // button1
+            // 
+            button1.Font = new Font("Times New Roman", 20.25F);
+            button1.Location = new Point(1269, 312);
+            button1.Name = "button1";
+            button1.Size = new Size(154, 41);
+            button1.TabIndex = 34;
+            button1.Text = "Проверить";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += check_shift;
+            // 
+            // richTextBox2
+            // 
+            richTextBox2.Location = new Point(287, 499);
+            richTextBox2.Name = "richTextBox2";
+            richTextBox2.Size = new Size(373, 193);
+            richTextBox2.TabIndex = 35;
+            richTextBox2.Text = "";
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Font = new Font("Times New Roman", 20.25F, FontStyle.Bold, GraphicsUnit.Point, 204);
+            label3.Location = new Point(287, 432);
+            label3.Name = "label3";
+            label3.Size = new Size(522, 62);
+            label3.TabIndex = 36;
+            label3.Text = "Таблица частот встречаемости символов \r\nв английском языке";
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1725, 717);
+            Controls.Add(label3);
+            Controls.Add(richTextBox2);
+            Controls.Add(button1);
+            Controls.Add(shiftTextBox);
+            Controls.Add(label2);
             Controls.Add(richTextBox1);
             Controls.Add(label1);
             Controls.Add(EncrypttextBox1);
@@ -276,5 +332,10 @@
         private RichTextBox EncrypttextBox1;
         private Label label1;
         private RichTextBox richTextBox1;
+        private Label label2;
+        private TextBox shiftTextBox;
+        private Button button1;
+        private RichTextBox richTextBox2;
+        private Label label3;
     }
 }

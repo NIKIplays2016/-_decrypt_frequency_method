@@ -31,58 +31,21 @@ namespace WinFormsApp1
 
             foreach (char c in plaintext)
             {
-                if (char.IsLetter(c) || (n == 256 && c < 256))
+                if (char.IsLower(c) && n == 26)
                 {
-                    char baseChar = (n == 26) ? (char)(char.IsLower(c) ? 'a' : 'A') : (char)0;
-                    int i = (n == 26) ? (c - baseChar) : c; // Номер символа в алфавите или ASCII
+                    int i = c - 'a'; // Номер символа в алфавите
                     int encryptedIndex = (i * k1 + k0) % n; // Применяем шифрование
-                    ciphertext += (char)(baseChar + encryptedIndex); // Добавляем зашифрованный символ
+                    ciphertext += (char)('a' + encryptedIndex); // Добавляем зашифрованный символ
                 }
                 else
                 {
-                    ciphertext += c; // Добавляем символы, которые не являются буквами или ASCII
+                    ciphertext += c; // Добавляем символы, которые не являются буквами нижнего регистра
                 }
             }
 
             return ciphertext;
         }
-        static string Decrypt(string encrypt_text, int k0, int k1, int n)
-        {
-            string plaintext = "";
 
-            // Находим мультипликативную обратную k1
-            int k1Inverse = -1;
-            for (int i = 1; i < n; i++)
-            {
-                if ((k1 * i) % n == 1)
-                {
-                    k1Inverse = i;
-                    break;
-                }
-            }
-
-            if (k1Inverse == -1)
-            {
-                MessageBox.Show("k1 не имеет обратного значения по модулю n.");
-            }
-
-            foreach (char c in encrypt_text)
-            {
-                if (char.IsLetter(c) || (n == 256 && c < 256))
-                {
-                    char baseChar = (n == 26) ? (char)(char.IsLower(c) ? 'a' : 'A') : (char)0;
-                    int i = (n == 26) ? (c - baseChar) : c; // Номер символа в алфавите или ASCII
-                    int decryptedIndex = (k1Inverse * (i - k0 + n)) % n; // Применяем дешифрование
-                    plaintext += (char)(baseChar + decryptedIndex); // Добавляем расшифрованный символ
-                }
-                else
-                {
-                    plaintext += c; // Добавляем символы, которые не являются буквами или ASCII
-                }
-            }
-
-            return plaintext;
-        }
         private void buttonEncrypt_Click(object sender, EventArgs e)
         {
             string information = InformationtextBox.Text.ToString();
@@ -124,7 +87,7 @@ namespace WinFormsApp1
             }
 
             // Выполнение шифрования
-            string ciphertext = Encrypt(information, k0, k1, n);
+            string ciphertext = Encrypt(information.ToLower(), k0, k1, n);
             EncrypttextBox0.Text = ciphertext;
             EncrypttextBox0.ReadOnly = true;
         }
@@ -144,38 +107,130 @@ namespace WinFormsApp1
 
         }
 
+        private int FindShift(Dictionary<char, double> languageFrequencies, Dictionary<char, int> letterCount, int textLength)
+        {
+            double minDifference = double.MaxValue;
+            int bestShift = 0;
+
+            for (int shift = 0; shift < 26; shift++)
+            {
+                double totalDifference = 0;
+
+                foreach (var pair in languageFrequencies)
+                {
+                    char shiftedChar = (char)((pair.Key - 'a' + shift) % 26 + 'a');
+                    double observedFrequency = letterCount.ContainsKey(shiftedChar) ? (double)letterCount[shiftedChar] / textLength : 0;
+                    totalDifference += Math.Abs(pair.Value - observedFrequency);
+                }
+
+                if (totalDifference < minDifference)
+                {
+                    minDifference = totalDifference;
+                    bestShift = shift;
+                }
+            }
+
+
+            return bestShift;
+        }
+
         private void hack_text(object sender, EventArgs e)
         {
-            string input = EncrypttextBox0.Text;
-            int length = input.Length;
             double frequency;
+            // Английский алфавит
+            Dictionary<char, double> englishFrequencies = new Dictionary<char, double>
+    {
+        {'e', 12.31}, {'t', 9.59}, {'a', 8.05}, {'o', 7.94}, {'n', 7.19},
+        {'i', 7.18}, {'s', 6.59}, {'r', 6.03}, {'l', 4.03},
+        {'d', 3.65}, {'c', 3.20}, {'u', 3.10}, {'p', 2.29}, {'f', 2.28},
+        {'w', 2.03}, {'y', 1.88}, {'b', 1.62}, {'g', 1.61},
+        {'v', 0.93}, {'k', 0.52}, {'q', 0.20}, {'x', 0.20}, {'j', 0.10}, {'z', 0.09}
+    };
+
+            string input = EncrypttextBox0.Text.ToLower();
+            int length = input.Length;
+
             // Словарь для хранения количества каждой буквы
             Dictionary<char, int> letterCount = new Dictionary<char, int>();
+            int new_str = 0;
+            foreach (var pair in englishFrequencies)
+            {
+                 new_str++;
+                 richTextBox2.AppendText($"  {pair.Key} - {pair.Value}  ");
+                 if (new_str % 3 == 0)
+                 {
+                     richTextBox2.AppendText("\n");
+                 }
+            }
 
             foreach (char c in input)
             {
                 if (char.IsLetter(c)) // Проверяем, является ли символ буквой
                 {
-                    char lowerChar = char.ToLower(c); // Приводим букву к нижнему регистру, чтобы не различать 'A' и 'a'
-
-                    if (letterCount.ContainsKey(lowerChar))
+                    if (letterCount.ContainsKey(c))
                     {
-                        letterCount[lowerChar]++;
+                        letterCount[c]++;
                     }
                     else
                     {
-                        letterCount[lowerChar] = 1;
+                        letterCount[c] = 1;
                     }
                 }
             }
 
-            // Вывод результата в MessageBox или другое место
-            
+            // Найти сдвиг
+            int shift = FindShift(englishFrequencies, letterCount, length);
+
+            // Дешифрование текста с найденным сдвигом
+            string decryptedText = DecryptCaesar(input, shift);
+            EncrypttextBox1.Clear();
+            EncrypttextBox1.AppendText($"Предполагаемый сдвиг: {shift}\n");
+            EncrypttextBox1.AppendText($"Расшифрованный текст: \n{decryptedText}\n");
+
+            new_str = 0;
             foreach (var pair in letterCount)
             {
-                frequency = Math.Round((double)pair.Value / length, 4) * 100;
+                new_str++;
+                frequency = Math.Round(((double)pair.Value / length) * 100, 1);
                 richTextBox1.AppendText($"  {pair.Key} - {frequency}  ");
+                if (new_str % 3 == 0)
+                {
+                    richTextBox1.AppendText("\n");
+                }
             }
+
+            
         }
+
+        private string DecryptCaesar(string input, int shift)
+        {
+            string result = "";
+
+            foreach (char c in input)
+            {
+                if (char.IsLetter(c))
+                {
+                    char decryptedChar = (char)((c - 'a' - shift + 26) % 26 + 'a');
+                    result += decryptedChar;
+                }
+                else
+                {
+                    result += c;
+                }
+            }
+
+            return result;
+        }
+
+        private void check_shift(object sender, EventArgs e)
+        {
+            int shift = shiftTextBox.Text == "" ? 0 : int.Parse(shiftTextBox.Text);
+
+            string encryptedText = DecryptCaesar(EncrypttextBox0.Text.ToLower(), shift);
+            EncrypttextBox1.Clear();
+            EncrypttextBox1.AppendText($"Предполагаемый сдвиг: {shift}\n");
+            EncrypttextBox1.AppendText($"Расшифрованный текст: \n{encryptedText}\n");
+        }
+
     }
 }
